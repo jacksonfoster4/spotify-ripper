@@ -5,11 +5,6 @@ from urllib.parse import urlencode
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 
-params = {
-    'client_id': os.getenv('CLIENT_ID'),
-    'response_type': 'code',
-    'redirect_uri': 'localhost:8888/callback'
-}
 SCOPE = 'user-read-currently-playing user-read-playback-state user-modify-playback-state streaming app-remote-control playlist-modify-private playlist-read-collaborative playlist-read-private playlist-modify-public user-read-recently-played user-read-playback-position user-top-read'
 
 app = Flask(__name__)
@@ -25,5 +20,16 @@ def play():
 
 @app.route('/pause')
 def pause():
-    print(app.spotify.pause_playback())
+    app.spotify.pause_playback()
     return 'hello'
+
+if __name__ == "__main__":
+    app.run()
+
+# algorithm
+    # need to record audio output and then trim each individual track from stream
+        # i need to use spotify api to start playing an album/playlist, get list of tracks in album/playlist, 
+        # get track info, get track length
+        # record audio input to .wav
+        # using the track lengths, split the .wav file into individual tracks
+        # update individual track info (artist, album, art, etc...)
