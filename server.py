@@ -1,5 +1,4 @@
-from flask import Flask, redirect
-from flask import request
+from flask import Flask, redirect from flask import request
 import os, re
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
@@ -61,13 +60,13 @@ def format_response(url):
     """
     pass
 
-def get_id_from_url(url):
+def get_id_from_url(url) -> tuple:
     if 'album' in url:
         return ('album', re.search('album/(.*?)\?', url).group(1)) 
     elif 'playlist' in url:
         return ('playlist', re.search('playlist/(.*?)\?', url).group(1)) 
 
-def get_id_from_spotify_uri(url):
+def get_id_from_spotify_uri(url) -> tuple:
     if 'album' in url:
         return ('album', url.split(':')[2]) 
     elif 'playlist' in url:
