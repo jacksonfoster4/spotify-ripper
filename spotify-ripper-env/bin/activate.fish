@@ -29,7 +29,7 @@ end
 # unset irrelevant variables
 deactivate nondestructive
 
-set -gx VIRTUAL_ENV "/home/jacksonfoster/Code/projects/spotify-ripper/spotify-ripper-env"
+set -gx VIRTUAL_ENV "/Users/jacksonfoster/Code/projects/spotify-ripper/spotify-ripper-env"
 
 set -gx _OLD_VIRTUAL_PATH $PATH
 set -gx PATH "$VIRTUAL_ENV/bin" $PATH

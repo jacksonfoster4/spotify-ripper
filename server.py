@@ -1,7 +1,9 @@
-from flask import Flask, redirect from flask import request
+from flask import Flask, redirect 
+from flask import request
 import os, re
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
+from audio import Audio
 
 SCOPE = 'user-read-currently-playing user-read-playback-state user-modify-playback-state streaming app-remote-control playlist-modify-private playlist-read-collaborative playlist-read-private playlist-modify-public user-read-recently-played user-read-playback-position user-top-read'
 
@@ -33,14 +35,24 @@ def playlist_items():
 
 @app.route('/album-tracks')
 def album_tracks():
-    app.spotify.album_tracks('4EPQtdq6vvwxuYeQTrwDVY')
+    app.spotify.album_tracks('3kEtdS2pH6hKcMU9Wioob1')
     format_url('https://open.spotify.com/album/4EPQtdq6vvwxuYeQTrwDVY?si=YqyoZK1VTpqNkU0cOIZEog')
     return 'album items'
 
+@app.route('/convert')
+def convert():
+    music = get_tracks('spotify:album:3kEtdS2pH6hKcMU9Wioob1')
+    if 'album' in music:
+        print('album')
+        Audio(music['album'], music['tracks'])
+    elif 'playlist' in formatted:
+        print('playlist')
+        Audio(music['playlist'], music['tracks'])
+    return 'convert'
         
-def get_tracks(url):
+def get_tracks(url) -> dict:
     """
-    takes in playlist/album url, uses the appropriate method to get response object
+    takes in playlist/album url, uses the appropriate method to get and return response object
     """
     obj_id: tuple
     if url[:4] == 'http':
@@ -49,16 +61,40 @@ def get_tracks(url):
         obj_id = get_id_from_spotify_uri(url) 
 
     if obj_id[0] == 'album':
-        return app.spotify.album_tracks(obj_id[1])
+        return {
+            'album': app.spotify.album(obj_id[1]),
+            'tracks': app.spotify.album_tracks(obj_id[1])
+        }
     elif obj_id[0] == 'playlist':
-        return app.spotify.playlist_items(obj_id[1])
+        return {
+            'playlist': app.spotify.playlist(obj_id[1]),
+            'tracks': app.spotify.playlist_items(obj_id[1])
+        }
 
-
-def format_response(url):
+def format_response(obj):
     """
     returns track name, track artist, track duration, track art, track album, misc info
     """
-    pass
+    final = {
+
+    }
+    type_of_collection: str
+    # album obj
+    if 'album' in obj:
+        type_of_collection = 'album'
+        final['main_image'] = obj['album']['images'][0]['url']
+        final['name'] = obj['album']['name']
+        final['release_date'] = obj['album']['release_date']
+        final['label'] = obj['album']['label']
+        final['artist'] = obj['album']['artists'][0]['name']
+        final['tracks'] = obj['tracks']
+    elif 'playlist' in obj:
+        type_of_collection = 'playlist'
+        final['main_image'] = obj['playlist']['images'][0]['url']
+        final['name'] = obj['playlist']['name']
+        final['tracks'] = obj['tracks']
+
+    return final
 
 def get_id_from_url(url) -> tuple:
     if 'album' in url:
@@ -83,6 +119,6 @@ if __name__ == "__main__":
         # record audio input to .wav
         # using the track lengths, split the .wav file into individual tracks
         # update individual track info (artist, album, art, etc...)
-        # spotify:playlist:7bzrB54qTMgvLbeuusJlOJ
-        # spotify:album:4EPQtdq6vvwxuYeQTrwDVY
+        # flag to get playlist art
+        # test album spotify:album:3kEtdS2pH6hKcMU9Wioob1
     # need to upload files to cloud, then delete
