@@ -55,7 +55,7 @@ def split_songs(collection, playlist=False):
 
 
 
-class Collection():
+class Audio():
     def __init__(self, collection, tracks):
         # collection is playlist or album
         file_path = 'Illmatic (Full Album).mp3'

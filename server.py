@@ -1,3 +1,4 @@
+import time
 from flask import Flask, redirect 
 from flask import request
 import os, re
@@ -58,20 +59,22 @@ def convert():
         #   pause track
         #   rewind
     #   play and begin recording
-    music = get_tracks('spotify:album:3kEtdS2pH6hKcMU9Wioob1')
-    if 'album' in music:
-        print('album')
+    list_of_collections = [
+        'spotify:album:3kEtdS2pH6hKcMU9Wioob1',
+    ]
+    for collection_link in list_of_collections:
+        music = get_tracks(collection_link)
         add_to_queue(music)
-        # Audio(music['album'], music['tracks'])
-    elif 'playlist' in formatted:
-        print('playlist')
-        print(music)
-        # Audio(music['playlist'], music['tracks'])
+    
+    
+    app.spotify.next_track()
+    time.sleep(4)
+    app.spotify.pause_playback()
+    app.spotify.seek_track(0)
+
+    print('begin recording', app.spotify.start_playback())
+
     return 'convert'
-
-
-
-
 
 def get_runtime(tracks):
     runtime = 0
@@ -83,7 +86,7 @@ def get_runtime(tracks):
 def add_to_queue(collection):
     for track in collection['tracks']['items']:
         uri = track['uri']
-        # app.spotify.add_to_queue(uri) 
+        #  app.spotify.add_to_queue(uri) 
 
 
 
