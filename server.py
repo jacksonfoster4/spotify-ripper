@@ -1,9 +1,14 @@
 from flask import Flask, redirect 
 from flask import request
 import os, re
+from dotenv import load_dotenv
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 from audio import Audio
+
+
+load_dotenv()
+
 
 SCOPE = 'user-read-currently-playing user-read-playback-state user-modify-playback-state streaming app-remote-control playlist-modify-private playlist-read-collaborative playlist-read-private playlist-modify-public user-read-recently-played user-read-playback-position user-top-read'
 
@@ -41,15 +46,47 @@ def album_tracks():
 
 @app.route('/convert')
 def convert():
+    # get list of collections from front end
+    # for collection in collections:
+    #   music = get_tracks(url/uri)
+    #   add_to_queue(music)
+    #   start on track not in queue
+    #   skip to first track in queue
+        ## this ensures that recording starts at the same time
+        ## as playback. 
+        #   wait 3 seconds
+        #   pause track
+        #   rewind
+    #   play and begin recording
     music = get_tracks('spotify:album:3kEtdS2pH6hKcMU9Wioob1')
     if 'album' in music:
         print('album')
-        Audio(music['album'], music['tracks'])
+        add_to_queue(music)
+        # Audio(music['album'], music['tracks'])
     elif 'playlist' in formatted:
         print('playlist')
-        Audio(music['playlist'], music['tracks'])
+        print(music)
+        # Audio(music['playlist'], music['tracks'])
     return 'convert'
+
+
+
+
+
+def get_runtime(tracks):
+    runtime = 0
+    for track in tracks:
+        runtime += track['duration_ms']
+    return runtime
         
+
+def add_to_queue(collection):
+    for track in collection['tracks']['items']:
+        uri = track['uri']
+        # app.spotify.add_to_queue(uri) 
+
+
+
 def get_tracks(url) -> dict:
     """
     takes in playlist/album url, uses the appropriate method to get and return response object
@@ -61,14 +98,20 @@ def get_tracks(url) -> dict:
         obj_id = get_id_from_spotify_uri(url) 
 
     if obj_id[0] == 'album':
+        tracks = app.spotify.album_tracks(obj_id[1])
+        album = app.spotify.album(obj_id[1])
         return {
-            'album': app.spotify.album(obj_id[1]),
-            'tracks': app.spotify.album_tracks(obj_id[1])
+            'runtime': get_runtime(tracks['items']),
+            'album': album,
+            'tracks': tracks
         }
     elif obj_id[0] == 'playlist':
+        tracks = app.spotify.playlist_items(obj_id[1])
+        playlist = app.spotify.playlist(obj_id[1])
         return {
-            'playlist': app.spotify.playlist(obj_id[1]),
-            'tracks': app.spotify.playlist_items(obj_id[1])
+            'runtime': get_runtime(tracks['items']),
+            'playlist': playlist,
+            'tracks': tracks,
         }
 
 def format_response(obj):
@@ -122,3 +165,4 @@ if __name__ == "__main__":
         # flag to get playlist art
         # test album spotify:album:3kEtdS2pH6hKcMU9Wioob1
     # need to upload files to cloud, then delete
+    # open first albumii

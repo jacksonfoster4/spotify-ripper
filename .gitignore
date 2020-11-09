@@ -3,3 +3,4 @@
 .cache
 spotify-ripper-env
 *.swp
+music/*
